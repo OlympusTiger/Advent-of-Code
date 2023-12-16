@@ -1,5 +1,3 @@
-from time import time
-s=time()
 with open('input.txt') as f:
     grid=[list(i) for i in f.read().splitlines()]
 
@@ -77,4 +75,4 @@ def main():
     return max(combs)
 
 print(main())
-print(time()-s)
+
