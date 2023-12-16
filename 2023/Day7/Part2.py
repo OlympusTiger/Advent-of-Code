@@ -2,6 +2,7 @@
 with open('2023\Day7\input.txt') as f:
     lines=f.read().splitlines()
 
+
 hands=[[l.split()[0],l.split()[1]] for l in lines]
 
 

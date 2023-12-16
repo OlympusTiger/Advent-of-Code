@@ -1,4 +1,5 @@
-from time import sleep
+from time import time
+s=time()
 with open('2023\Day5\input.txt') as f:
     seeds=list(map(int,f.readline().strip('\n').split()[1:]))
     maps=list(map(lambda x:x[x.index(':')+1:].strip('\n ').split('\n'),f.read().split('\n\n')))
@@ -59,10 +60,4 @@ result(seeds)
 
 
 
-        
-
-
-
-
-
-#result(seeds)
+print((time()-s)*1000)
