@@ -1,4 +1,3 @@
-
 with open('2023\Day7\input.txt') as f:
     lines=f.read().splitlines()
 
