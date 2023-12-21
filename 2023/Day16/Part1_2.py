@@ -1,4 +1,5 @@
-with open('input.txt') as f:
+from time import sleep
+with open('2023\Day16\input.txt') as f:
     grid=[list(i) for i in f.read().splitlines()]
 
 Part2=True
@@ -14,36 +15,36 @@ def track_beam(tile,heading,energized=[],path_used=[]):
   
     while (tile,heading) not in path_used:
 
+        
         i,j=tile
 
         if not (0<=i<len(grid) and 0<=j<len(grid[0])):
-            prev=tuple(map(lambda x:-x,heading))
-            exit_=tuple(map(sum,zip(tile,prev)))
-
-            if (exit_,prev) in entrances:
-                entrances.remove((exit_,prev))
+            # prev=(-heading[0],-heading[1])
+            # exit_=(tile[0]+heading[0],tile[1]+heading[1])
+            # if (exit_,prev) in entrances:
+            #     entrances.remove((exit_,prev))
             return energized
 
         energized.append(tile)
         symbol=grid[i][j]
 
         if symbol=='.':          
-            tile=tuple(map(sum,zip(tile,heading)))
+            tile=(tile[0]+heading[0],tile[1]+heading[1])
 
         elif symbol in '-|' and heading not in list(dir_map[symbol].keys()):
             path_used.append((tile,heading))
-            tile=tuple(map(sum,zip(tile,heading)))
+            tile=(tile[0]+heading[0],tile[1]+heading[1])
 
         else:
             if symbol in '-|':     
-                path_used+=[(tile,heading),(tile,tuple(map(lambda x:-x,heading)))]
+                path_used+=[(tile,heading),(tile,(-heading[0],-heading[1]))]
                 
                 head0=dir_map[symbol][heading][0]
-                new0=tuple(map(sum,zip(tile,head0)))
+                new0=(tile[0]+head0[0],tile[1]+head0[1])
                 energized=track_beam(new0,head0,energized,path_used)
 
                 head1=dir_map[symbol][heading][1]
-                new1=tuple(map(sum,zip(tile,head1)))
+                new1=(tile[0]+head1[0],tile[1]+head1[1])
                 energized=track_beam(new1,head1,energized,path_used)
 
             else:
@@ -51,13 +52,13 @@ def track_beam(tile,heading,energized=[],path_used=[]):
 
                 try:    
                     head=dir_map[symbol][heading]
-                    new=tuple(map(sum,zip(tile,head)))
+                    new=(tile[0]+head[0],tile[1]+head[1])
                     
                     energized=track_beam(new,head,energized,path_used)
 
                 except KeyError:    
                     head=list(dir_map[symbol].keys())[list(dir_map[symbol].values()).index(heading)]
-                    new=tuple(map(sum,zip(tile,head)))
+                    new=(tile[0]+head[0],tile[1]+head[1])
 
                     energized=track_beam(new,head,energized,path_used)
     
@@ -68,7 +69,8 @@ def main():
         return len(set(track_beam((0,0),(0,1))))
 
     combs=[]
-    for en in entrances[::-1]:
+    for en in entrances:
+        print(en)
         t,h=en
         combs.append(len(set(track_beam(t,h,[],[]))))
 
