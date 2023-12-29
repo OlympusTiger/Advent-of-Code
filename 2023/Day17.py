@@ -18,7 +18,7 @@ inp='''\
 4322674655533
 '''
 
-b=12
+b=12 # grid size
 def parse_map(inp):
     grid=[list(l) for l in inp.splitlines()]
 
@@ -26,97 +26,87 @@ def parse_map(inp):
     end=b,b
     return grid,start,end
 
-def valid(grid,pos,pred):
+def valid(grid,pos):
     x,y=pos
-    
-    
+
     if 0 <= x < len(grid) and 0 <= y < len(grid[0]):
-        
-        print(pred)
-        pred+=[pos]
-       
-        if len(pred) >=4:
-            x_directions = [i[0] for i in pred[-4:]]
-           
-            y_directions = [i[1] for i in pred[-4:]]
-            
-
-            if len(set(x_directions)) == 1 or \
-               len(set(y_directions)) == 1:
-
-               
-               return False
-            print(x_directions)
-            print(y_directions)
-        return True
-    
+        return True  
     return False
 
-def get_neighbors(grid,pos,prev):
+
+def get_neighbors(grid,pos):
     
-    
-    rec=[pos]
-    p=pos
-    while p!=(0,0):
-        rec.insert(0,prev[p])
-        p=prev[p]
-   
     lst=[(0,1),(0,-1),(1,0),(-1,0)]
     x,y=pos
     
-    for i in lst:
-        
+    for i in lst:        
         pos=(x+i[0],y+i[1])
     
-        if valid(grid,pos,rec):
-    
-            yield pos
+        if valid(grid,pos):
+            yield pos,i
 
 
-def get_shorter_paths(weights, positions, through):
+def get_shorter_paths(weights, c, positions, through):
     path = weights[through]
-  
-    for position in positions:
-        if position in weights and weights[position] <= weights[through]:
+
+    for position,h in positions:
+        if weights[position] <= path+int(lines[position[0]][position[1]]):         
             continue
         
-        yield position, path
+        yield position, c, path, h
 
 
 def find_path(map):
+    global lines
     lines, origin, destination = parse_map(map)
     
     weights = dict.fromkeys([(i,j) for i,j in product(range(len(lines)),repeat=2)],inf)
     weights[origin]=0
     
+    queue = []        #  loss c   pos   heading
+    heapq.heappush(queue, (0, 0, origin, None))
     
-    queue = []
-    heapq.heappush(queue, (0, origin))
     prev=dict.fromkeys([(i,j) for i,j in product(range(len(lines)),repeat=2)],None)
-    certain = set()
-    while destination not in certain:
-        
-        _ig,current = heapq.heappop(queue)
-       
-      
-        if current in certain:
+    explored = set()
+    while destination not in explored:
+   
+        _loss, c,current,heading = heapq.heappop(queue)
+            
+        if current in explored:
             continue
-        certain.add(current)
-        neighbors = set(get_neighbors(lines, current,prev)) - certain
-      
+
+        explored.add(current)
+
+        neighbors = set(get_neighbors(lines, current)) - explored    
+        shorter = get_shorter_paths(weights, c, neighbors, current)
         
-        shorter = get_shorter_paths(weights, neighbors, current)
-        
-        for neighbor, path in shorter:
+        for neighbor, c, path, h in shorter:
             weights[neighbor] = path+int(lines[neighbor[0]][neighbor[1]])
             prev[neighbor]=current
-            heapq.heappush(queue, (weights[neighbor], neighbor))
-    if destination in weights:
-        
+
+            if c==3 and h==heading:
+                continue
+            elif h!=heading:
+                heapq.heappush(queue, (weights[neighbor], 1, neighbor, h))
+            else:
+                heapq.heappush(queue, (weights[neighbor], c+1, neighbor, h))
+           
+            
+    if destination in weights:     
         return weights[destination],prev
+
     else:
         raise ValueError("no path")        
 
 d,pred=find_path(inp)
-
 print(d)
+
+
+p=(b,b)
+prev=[p]
+while p!=(0,0):
+    prev.append(pred[p])
+    p=pred[p]
+    
+print(prev[::-1])
+
